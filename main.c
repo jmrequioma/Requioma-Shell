@@ -17,8 +17,9 @@
 #include <sys/stat.h>
 
 #define SIZE 15
+#define TOKEN_SIZE 5    // constant number of allowed tokens in a line
 
-char *token[5];
+char *token[TOKEN_SIZE];
 int tokenCount = 0;
 
 /**
@@ -104,6 +105,40 @@ void execCD(){
 }
 
 /**
+   @brief moves the file from one directory to another
+   @param none
+   @return none.
+ */
+void execChdir(){
+    char *buffer = "";
+    char directory[1024];
+
+    //  checks if there is no token beside the chdir command
+    if(token[1] == NULL){
+        if(strlen(token[0]) == 7){
+            if(token[0][5] == '.' && token[0][6] == '.'){
+                chdir("..");
+            }
+        }
+    }
+
+        //  if it's not NULL,
+    else if(token[1] != NULL){
+        strcpy(directory, "./");
+        strcpy(directory, token[1]);
+        if(token[1][0] == '.' && token[1][1] == '.'){
+            chdir(directory);
+        }
+        else if(chdir(directory) == -1) {
+            printNotValid();
+        }
+    }
+    printcwd(buffer);
+
+    return ;
+}
+
+/**
    @brief prints the list of available and acceptable commands.
    @param none
    @return none.
@@ -166,10 +201,10 @@ void execType(){
  */
 
 int execTime(){
-    char newTime[SIZE];//variable holder for the new time
-    char currentTime[100];//variable holder for the current time
-    time_t now = time (0);//system time
-    char *timeArray[SIZE];//variable holder for getting time elements
+    char newTime[SIZE];     // holds new time
+    char currentTime[100];  // holds current time
+    time_t now = time (0);  // system time
+    char *timeArray[SIZE];  // array for time
     int i = 0, hour, min, sec, msec;
 
     strftime (currentTime, 100, "%H:%M:%S.000", localtime (&now)); //gets current time
@@ -558,40 +593,6 @@ void execCmd(){
  */
 void execCLS(){
     system("cls");
-    return ;
-}
-
-/**
-   @brief moves the file from one directory to another
-   @param none
-   @return none.
- */
-void execChdir(){
-    char *buffer = "";
-    char directory[1024];
-
-    //  checks if there is no token beside the chdir command
-    if(token[1] == NULL){
-        if(strlen(token[0]) == 7){
-            if(token[0][5] == '.' && token[0][6] == '.'){
-                chdir("..");
-            }
-        }
-    }
-
-        //  if it's not NULL,
-    else if(token[1] != NULL){
-        strcpy(directory, "./");
-        strcpy(directory, token[1]);
-        if(token[1][0] == '.' && token[1][1] == '.'){
-            chdir(directory);
-        }
-        else if(chdir(directory) == -1) {
-            printNotValid();
-        }
-    }
-    printcwd(buffer);
-
     return ;
 }
 
