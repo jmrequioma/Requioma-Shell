@@ -72,7 +72,7 @@ void printNotValid(){
 }
 
 /**
-   @brief prints the list of available and acceptable commmands.
+   @brief prints the list of available and acceptable commands.
    @param none
    @return none.
  */
@@ -98,7 +98,12 @@ void doHelp(){
     printf("TYPE\tDisplays the contents of a text file.\n");
 
 }
-//this function does the type command
+
+/**
+   @brief types contents into a file
+   @param none
+   @return none.
+ */
 void doType(){
     FILE *file;//a pointer to a file
     int filechar;//variable holder for a character
@@ -120,7 +125,13 @@ void doType(){
     printf("\n");
     return ;
 }
-//this function does the time command
+
+/**
+   @brief displays the current system time
+   @param none
+   @return none.
+ */
+
 int doTime(){
     char newTime[SIZE];//variable holder for the new time
     char currentTime[100];//variable holder for the current time
@@ -165,7 +176,12 @@ int doTime(){
     printf("A required privilege is not held by the client.\n");
     return 1;
 }
-//this function does the rmdir command
+
+/**
+   @brief deletes a specified directory
+   @param none
+   @return none.
+ */
 int doRmdir(){
     int i = 1;
 
@@ -183,7 +199,12 @@ int doRmdir(){
     }
     return 1;
 }
-//this function does the rename command
+
+/**
+   @brief renames a file/directory
+   @param none
+   @return none.
+ */
 int doRename(){
     int result;
 
@@ -450,7 +471,7 @@ void doCmd(){
     if (dwVersion < 0x80000000)
         dwBuild = (DWORD)(HIWORD(dwVersion));
 
-    printf("Microsoft Windows [Version %ld.%ld.%ld]\n(c) 2017 Microsoft Corporation. All rights reserved.\n",
+    printf("Microsoft Windows [Version %ld.%ld.%ld]\n(c) 2018 Microsoft Corporation. All rights reserved.\n",
            dwMajorVersion,
            dwMinorVersion,
            dwBuild);
