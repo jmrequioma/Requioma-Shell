@@ -17,18 +17,17 @@
 #include <sys/stat.h>
 
 #define SIZE 15
-//new line on rmdir and mkdir
 
-char *token[5];//maximum number of tokens in a command is 5
-int tokenCount = 0;//
+char *token[5];
+int tokenCount = 0;
 
 /**
    @brief prints the working directory.
-   @param buffer
+   @param buffer the space for input
    @return none.
  */
 void printcwd(char *buffer){
-    if( (buffer = _getcwd( NULL, 0 )) == NULL )// Get the current working directory:
+    if( (buffer = _getcwd( NULL, 0 )) == NULL ) // current working directory
         perror( "_getcwd error" );
     else{
         printf( "%s>", buffer);
@@ -37,7 +36,7 @@ void printcwd(char *buffer){
 }
 /**
    @brief counts the given string's length
-   @param string The string to be counted
+   @param *string The string to be counted
    @return number of chars in the given string.
  */
 int getStringCount(char *string) {
@@ -49,7 +48,6 @@ int getStringCount(char *string) {
             break;
         }
     }
-
     return i;
 }
 
@@ -58,7 +56,7 @@ int getStringCount(char *string) {
    @param none
    @return none.
  */
-void notFound() {
+void pathNotFound() {
     printf("The system cannot find the path specified.\n");
 }
 
@@ -72,30 +70,65 @@ void printNotValid(){
 }
 
 /**
+   @brief changes directory
+   @param none
+   @return none.
+ */
+void execCD(){
+    char *buffer = "";
+    char directory[1024];
+
+    //  checks if there is no token after the cd command
+    if(token[1] == NULL){
+        if(strlen(token[0]) == 4){
+            if(token[0][2] == '.' && token[0][3] == '.'){       // checks for ".." beside cd
+                chdir("..");
+            }
+        }
+    }
+
+        //  if it's not NULL
+    else if(token[1] != NULL){
+        strcpy(directory, "./");
+        strcpy(directory, token[1]);
+        if(token[1][0] == '.' && token[1][1] == '.'){       // checks for ".." beside second token
+            chdir(directory);
+        }
+        else if(chdir(directory) == -1) {       // no such directory exists!
+            pathNotFound();
+        }
+    }
+    printcwd(buffer);
+
+    return ;
+}
+
+/**
    @brief prints the list of available and acceptable commands.
    @param none
    @return none.
  */
-void doHelp(){
+void execHelp(){
     printf("For more information on a specific command, type HELP command-name\n");
-    printf("CD\tDisplays the name of or changes the current directory.\n");
-    printf("CHDIR\tChanges the current directory.\n");
-    printf("CLS\tClears the screen.\n");
-    printf("CMD\tStarts a new instance of the command interpreter.\n");
-    printf("COLOR\tSets the default console foreground and background colors.\n");
-    printf("COPY\tCopies one or more files to another location.\n");
-    printf("DATE\tDisplays or sets the date.\n");
-    printf("DEL\tDeletes one or more files.\n");
-    printf("DIR\tDisplays a list of files and subdirectories in a directory.\n");
-    printf("HELP\tProvides Help information for Windows commands.\n");
-    printf("MD\tCreates a directory.\n");
-    printf("MKDIR\tCreates a directory.\n");
-    printf("MOVE\tMoves one or more files from one directory to another directory.\n");
-    printf("RENAME\tRenames a file or files.\n");
-    printf("RD\tRemoves a directory.\n");
-    printf("RMDIR\tRemoves a directory.\n");
-    printf("TIME\tDisplays or sets the system time.\n");
-    printf("TYPE\tDisplays the contents of a text file.\n");
+    printf("CD\t\tDisplays the name of or changes the current directory.\n");
+    printf("CHDIR\t\tChanges the current directory.\n");
+    printf("CLS\t\tClears the screen.\n");
+    printf("CMD\t\tStarts a new instance of the command interpreter.\n");
+    printf("COLOR\t\tSets the default console foreground and background colors.\n");
+    printf("COPY\t\tCopies one or more files to another location.\n");
+    printf("DATE\t\tDisplays or sets the date.\n");
+    printf("DEL\t\tDeletes one or more files.\n");
+    printf("DIR\t\tDisplays a list of files and subdirectories in a directory.\n");
+    printf("HELP\t\tProvides Help information for Windows commands.\n");
+    printf("IPCONFIG\tDisplays all current TCP/IP network configuration values and refreshes Dynamic Host Configuration Protocol (DHCP) and Domain Name System (DNS) settings.\n");
+    printf("MD\t\tCreates a directory.\n");
+    printf("MKDIR\t\tCreates a directory.\n");
+    printf("MOVE\t\tMoves one or more files from one directory to another directory.\n");
+    printf("RENAME\t\tRenames a file or files.\n");
+    printf("RD\t\tRemoves a directory.\n");
+    printf("RMDIR\t\tRemoves a directory.\n");
+    printf("TIME\t\tDisplays or sets the system time.\n");
+    printf("TYPE\t\tDisplays the contents of a text file.\n");
 
 }
 
@@ -104,7 +137,7 @@ void doHelp(){
    @param none
    @return none.
  */
-void doType(){
+void execType(){
     FILE *file;//a pointer to a file
     int filechar;//variable holder for a character
 
@@ -132,7 +165,7 @@ void doType(){
    @return none.
  */
 
-int doTime(){
+int execTime(){
     char newTime[SIZE];//variable holder for the new time
     char currentTime[100];//variable holder for the current time
     time_t now = time (0);//system time
@@ -182,7 +215,7 @@ int doTime(){
    @param none
    @return none.
  */
-int doRmdir(){
+int execRmdir(){
     int i = 1;
 
     if(token[1] == NULL){
@@ -193,7 +226,7 @@ int doRmdir(){
     //removes directory if found
     while(token[i] != NULL) {
         if(rmdir(token[i]) == -1) {
-            notFound();//else prints an error statement
+            pathNotFound();//else prints an error statement
         }
         i++;
     }
@@ -205,7 +238,7 @@ int doRmdir(){
    @param none
    @return none.
  */
-int doRename(){
+int execRename(){
     int result;
 
 
@@ -217,12 +250,17 @@ int doRename(){
 
     //error handling
     if(result != 0) {
-        notFound();
+        pathNotFound();
     }
     return 1;
 }
-//this function does the mkdir command
-void doMkdir(){
+
+/**
+   @brief creates a directory
+   @param none
+   @return none.
+ */
+void execMkdir(){
     int i = 1;
 
     while(token[i] != NULL) {
@@ -233,8 +271,13 @@ void doMkdir(){
     }
     return ;
 }
-//this function does the dir command
-void doDir(DIR *dp, char *opendis){
+
+/**
+   @brief prints the contents of the current directory
+   @param *dp, *opendis
+   @return none.
+ */
+void execDir(DIR *dp, char *opendis){
     struct dirent *dir;
     dp = opendir(opendis);
     struct stat attr;
@@ -303,8 +346,12 @@ void doDir(DIR *dp, char *opendis){
     }
 
 }
-//this function does the delete command
-int doDelete(){
+/**
+   @brief deletes a file
+   @param none
+   @return none.
+ */
+int execDelete(){
 
     int i = 1;
     char cwd[1024];
@@ -317,7 +364,7 @@ int doDelete(){
         if(remove(token[i]) == -1) {
             getcwd(cwd, sizeof(cwd));
             if(i == 1) {
-                notFound();
+                pathNotFound();
                 return 0;
             }
         }
@@ -326,19 +373,30 @@ int doDelete(){
 
     return 1;
 }
-int doDelete2(){
+
+/**
+   @brief helper function to delete a file/directory during a move
+   @param none
+   @return none.
+ */
+int execDeleteToMove(){
 
     if(remove(token[1]) == -1) {
-        notFound();//else prints an error statement
+        pathNotFound(); // else prints an error statement
         return 0;
     }
 
     return 1;
 }
-//this function does the date command
-int doDate(){
-    char newdate[SIZE];//variable to hold the new date from input
-    char *dateElements[SIZE];//variable to hold date elements
+
+/**
+   @brief displays the current system date
+   @param none
+   @return none.
+ */
+int execDate(){
+    char newdate[SIZE]; // new date holder
+    char *dateElements[SIZE];   // date elements holder
     int i = 0, year, month, day, go = 0;
 
     time_t t = time(NULL);
@@ -382,8 +440,13 @@ int doDate(){
     printf("A required privilege is not held by the client.\n");
     return 1;
 }
-//this function changes the color of the shell
-void doColor(){
+
+/**
+   @brief changes the color of the shell
+   @param none
+   @return none.
+ */
+void execColor(){
     char color[50]="";
 
     if(token[1] == NULL){
@@ -399,11 +462,13 @@ void doColor(){
     system(color);
     return ;
 }
-//this function does the copy command
-int doCopy(){
-    //copy C:\Users\Munic\Desktop\text.txt C:\Users\Munic\Documents\codes\C\Shell\text.txt
-    //copy text.txt text2.txt
 
+/**
+   @brief copies a file
+   @param none
+   @return none.
+ */
+int execCopy(){
     FILE *file1, *file2;//variables for file pointers
     char fileChar;//character holder for file
     int filesCopied = 1;
@@ -438,24 +503,33 @@ int doCopy(){
 
     return 1;
 }
-//this function does the rename command
-void doMove(){
+/**
+   @brief moves the file from one directory to another
+   @param none
+   @return none.
+ */
+void execMove(){
 
     int filesMoved = 1;
 
     if(token[1] == NULL || token [2] == NULL){
-        notFound();
+        pathNotFound();
     }
     else{
-        if(doCopy() == 1 && doDelete2() == 1)
+        if(execCopy() == 1 && execDeleteToMove() == 1)
             printf("\t %d file(s) moved.\n", filesMoved);
         else
-            notFound();
+            pathNotFound();
     }
 
 }
-//this function does the cmd command
-void doCmd(){
+
+/**
+   @brief creates a new instance of a CMD
+   @param none
+   @return none.
+ */
+void execCmd(){
     DWORD dwVersion = 0;
     DWORD dwMajorVersion = 0;
     DWORD dwMinorVersion = 0;
@@ -476,43 +550,27 @@ void doCmd(){
            dwMinorVersion,
            dwBuild);
 }
-//this function does the cls command
-void doCLS(){
-    HANDLE hConsole;
-    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    COORD coordScreen = { 0, 0 };    // home for the cursor
-    DWORD cCharsWritten;
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    DWORD dwConSize;
-
-    if( !GetConsoleScreenBufferInfo( hConsole, &csbi )){// Get the number of character cells in the current buffer.
-        return ;
-    }
-
-    dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
-
-    if( !FillConsoleOutputCharacter(hConsole,(TCHAR)' ', dwConSize,coordScreen,&cCharsWritten )){
-        return ;
-    }
-
-    if( !GetConsoleScreenBufferInfo( hConsole, &csbi )){
-        return ;
-    }
-
-    if( !FillConsoleOutputAttribute( hConsole, csbi.wAttributes, dwConSize, coordScreen, &cCharsWritten )){
-    }
-
-    SetConsoleCursorPosition( hConsole, coordScreen );
-
+/**
+   @brief clears the screen
+   @param none
+   @return none.
+ */
+void execCLS(){
+    system("cls");
     return ;
 }
-//this function does the chdir command
-void doChdir(){
+
+/**
+   @brief moves the file from one directory to another
+   @param none
+   @return none.
+ */
+void execChdir(){
     char *buffer = "";
     char directory[1024];
 
-    //if there is no other token after chdir and there is a ".." after
+    //  checks if there is no token beside the chdir command
     if(token[1] == NULL){
         if(strlen(token[0]) == 7){
             if(token[0][5] == '.' && token[0][6] == '.'){
@@ -521,7 +579,7 @@ void doChdir(){
         }
     }
 
-        //if there is another token after chdir, change to that directory
+        //  if it's not NULL,
     else if(token[1] != NULL){
         strcpy(directory, "./");
         strcpy(directory, token[1]);
@@ -536,72 +594,59 @@ void doChdir(){
 
     return ;
 }
-//this function does the cd command
-void doCD(){
-    char *buffer = "";
-    char directory[1024];
 
-    //if there is no other token after cd and there is a ".." after
-    if(token[1] == NULL){
-        if(strlen(token[0]) == 4){
-            if(token[0][2] == '.' && token[0][3] == '.'){
-                chdir("..");
-            }
-        }
-    }
-
-        //if there is no other token after cd and there is a ".." after
-    else if(token[1] != NULL){
-        strcpy(directory, "./");
-        strcpy(directory, token[1]);
-        if(token[1][0] == '.' && token[1][1] == '.'){
-            chdir(directory);
-        }
-        else if(chdir(directory) == -1) {
-            notFound();
-        }
-    }
-    printcwd(buffer);
-
-    return ;
+/**
+   @brief displays the ip address of the machine
+   @param none
+   @return none.
+ */
+void execIpConfig() {
+    system("ipconfig");
 }
-//this function evaluates the input command
+
+/**
+   @brief validates whether given input tokens are allowed
+   @param *command the commmand given by the user
+   @return none.
+ */
 void evaluateToken(char *command){
     //the series of if statements evaluates the input command to which function to execute
     if(strcmp(command, "cd") == 0 || strcmp(command, "cd..") == 0){
-        doCD();
+        execCD();
         printf("\n");
     }
     else if(strcmp(command, "chdir") == 0 || strcmp(command, "chdir..") == 0){
-        doChdir();
+        execChdir();
         printf("\n");
     }
     else if(strcmp(command, "cls") == 0){
-        doCLS();
+        execCLS();
     }
     else if(strcmp(command, "cmd") == 0){
-        doCmd();
+        execCmd();
     }
     else if(strcmp(command, "copy") == 0){
-        doCopy();
+        execCopy();
     }
     else if(strcmp(command, "color") == 0){
-        doColor();
+        execColor();
     }
     else if(strcmp(command, "date") == 0){
-        doDate();
+        execDate();
     }
     else if(strcmp(command, "del") == 0){
-        doDelete();
+        execDelete();
+    }
+    else if(strcmp(command, "ipconfig") == 0) {
+        execIpConfig();
     }
     else if(strcmp(command, "dir") == 0){
         char cwd[1024];
         DIR *d;
         int i = 1;
         if(token[1] == NULL) {
-//			printf(getcwd(cwd, sizeof(cwd)));
             d = opendir(getcwd(cwd, sizeof(cwd)));
-            doDir(d, ".");
+            execDir(d, ".");
         } else {
             while(token[i] != NULL){
                 d = opendir(token[i]);
@@ -609,7 +654,7 @@ void evaluateToken(char *command){
                     printf("File not found\n");
                 } else {
                     printf("\nDirectory of %s\n", token[i]);
-                    doDir(d, token[i]);
+                    execDir(d, token[i]);
                 }
                 i++;
             }
@@ -617,25 +662,25 @@ void evaluateToken(char *command){
 
     }
     else if(strcmp(command, "mkdir") == 0 || strcmp(command, "md") == 0){
-        doMkdir();
+        execMkdir();
     }
     else if(strcmp(command, "move") == 0){
-        doMove();
+        execMove();
     }
     else if(strcmp(command, "rename") == 0 || strcmp(command, "ren") == 0){
-        doRename();
+        execRename();
     }
     else if(strcmp(command, "rmdir") == 0 || strcmp(command, "rd") == 0){
-        doRmdir();
+        execRmdir();
     }
     else if(strcmp(command, "time") == 0){
-        doTime();
+        execTime();
     }
     else if(strcmp(command, "type") == 0){
-        doType();
+        execType();
     }
     else if(strcmp(command, "help") == 0){
-        doHelp();
+        execHelp();
     }
     else if(strcmp(command, "exit") == 0){
         exit(0);
@@ -645,7 +690,12 @@ void evaluateToken(char *command){
     }
     return ;
 }
-//this function tokenizes the input
+
+/**
+   @brief tokenizes the input
+   @param *command the commmand given by the user
+   @return none.
+ */
 void tokenize(char *command){
     int i = 0;
 
@@ -663,7 +713,7 @@ void tokenize(char *command){
    @param command The command from user
    @return none.
  */
-void tolow(char *command){
+void toLowercase(char *command){
     int i = 0;
 
     while( command[i] ) {
@@ -671,23 +721,32 @@ void tolow(char *command){
         i++;
     }
 }
-//this function handles input functions
+/**
+   @brief converts the given command into lowercase.
+   @param none
+   @return none.
+ */
 void inputFunctions(){
     char command[1024];
-    gets(command);//gets the input
-    tolow(command);//converts to lowercase
-    tokenize(command);//tokenizes the input
-    evaluateToken(token[0]);//evaluates the command stored in token[0]
-    tokenCount = 0;//token count resets to zero every iteration
+    gets(command);      // gets the user input
+    toLowercase(command);     // converts the user input to lowercase
+    tokenize(command);  // tokenizes the user input
+    evaluateToken(token[0]);    // checks the first token
+    tokenCount = 0;     // number of tokens in a line is set to zero
 }
-//this function accepts input while not 'exit'
+
+/**
+   @brief non terminating function being called in main
+   @param none
+   @return none.
+ */
 void start(){
-    doCmd();
+    execCmd();
     char *currentDirectory;
 
     while(1){
         if( (currentDirectory = _getcwd( NULL, 0 )) == NULL )
-            perror( "_getcwd error" );
+            perror("getcwd error");
         else{
 
             printf( "\n%s>", currentDirectory);
@@ -698,7 +757,7 @@ void start(){
 }
 
 int main(){
-    token[0] = "";//initializes command to empty string
-    start();//call starts function
+    token[0] = "";   // set token to the empty string
+    start();
     return(0);
 }
