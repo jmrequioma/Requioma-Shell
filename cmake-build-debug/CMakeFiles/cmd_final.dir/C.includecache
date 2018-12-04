@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/simONE/CLionProjects/cmd-final/main.c
+stdio.h
+-
+stdlib.h
+-
+direct.h
+-
+time.h
+-
+string.h
+-
+direct.h
+-
+Windows.h
+-
+dirent.h
+-
+ctype.h
+-
+sys/stat.h
+-
+
